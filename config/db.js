@@ -1,9 +1,10 @@
 const sql = require('mssql')
+const env = require('dotenv').config(); 
 const sqlConfig = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PWD,
-  database: process.env.DB_NAME,
-  server: 'localhost',
+  user: env.parsed.DB_USER,
+  password: env.parsed.DB_PWD,
+  database: env.parsed.DB_NAME,
+  server: env.parsed.DB_SERVER,
   pool: {
     max: 10,
     min: 0,
@@ -11,6 +12,26 @@ const sqlConfig = {
   },
   options: {
     encrypt: true, // for azure
-    trustServerCertificate: false // change to true for local dev / self-signed certs
+    trustServerCertificate: env.parsed.ENV == 'dev' // change to true for local dev / self-signed certs
   }
+}
+let pool = null;
+
+const connectionPool = async () => {
+    if(pool){
+      console.log("pool existente");
+      return pool;
+    }
+    try {
+        pool =  await sql.connect(sqlConfig);
+        console.log("pool inicializado");
+        return pool;
+    } catch (error) {
+        return error;
+    }
+}
+
+module.exports = {
+  connectionPool,
+  sql
 }

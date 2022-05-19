@@ -1,22 +1,24 @@
-const { poolPromise } = require('./db');
+const { connectionPool, sql } = require('../config/db');
 
 exports.get_demo = async (req, res) => {
     try {
-       
+        const pool = await connectionPool();
+        const dbResult = await pool.request()
+            .input('Sucursal', sql.NVarChar(4), "2100")
+            .execute('Get_Expedientes_Por_Registrar');
+        res.json(dbResult);
     } catch(error) {
         res.send(error);
     }  
-    res.json("hello");
 }
 
 exports.add_demo = async (req, res) => {
     try {
-       
+        res.status(200).send('All ok');
     }
     catch(error) {
         console.log(error);
-    };
-    res.status(200).send('All ok');
+    }
 }
 
 
