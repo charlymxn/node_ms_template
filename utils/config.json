@@ -1,0 +1,28 @@
+{
+    "Prod": {
+        "TEMPLATE_PAGARE": "60a6d36245801d26c34f2b43",
+        "HOME_CREDIT": {
+            "TEMPLATE_CONTRATO": "620437b145801d448741bff2",
+            "TEMPLATE_MARKETPLACE": "62043f4145801d1aa814b212"
+        },
+        "NEGOCIO": {
+            "TEMPLATE_CONTRATO": "62043d8745801d068642eb72",
+            "TEMPLATE_MARKETPLACE": ""
+        }
+    },
+    "Dev": {
+        "TEMPLATE_PAGARE": "60a6d36245801d26c34f2b43",
+        "HOME_CREDIT": {
+            "TEMPLATE_CONTRATO": "60a7ff9845801d40ed6b8a72",
+            "TEMPLATE_MARKETPLACE": "619528f7eb4acc44c840a7b3"
+        },
+        "NEGOCIO": {
+            "TEMPLATE_CONTRATO": "617c101807f2092b08216fa1",
+            "TEMPLATE_MARKETPLACE": ""
+        },
+        "SDK":{
+            "TEMPLATE_PAGARE":"62797c2345801d7a71652362",
+            "TEMPLATE_CONTRATO":"62797be645801d779524e442"
+        }
+    }
+}

@@ -1,0 +1,44 @@
+{
+  "_from": "git+https://github.com/Juan-DeLeon/provident-originacion-apilogger.git",
+  "_id": "provident-originacion-apilogger@1.0.0",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/provident-originacion-apilogger",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "https://github.com/Juan-DeLeon/provident-originacion-apilogger",
+    "rawSpec": "https://github.com/Juan-DeLeon/provident-originacion-apilogger",
+    "saveSpec": "git+https://github.com/Juan-DeLeon/provident-originacion-apilogger.git",
+    "fetchSpec": "https://github.com/Juan-DeLeon/provident-originacion-apilogger.git",
+    "gitCommittish": null
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "git+https://github.com/Juan-DeLeon/provident-originacion-apilogger.git#29e1e5fcfee62413c6bcfbdcec142511a8d37bf9",
+  "_spec": "https://github.com/Juan-DeLeon/provident-originacion-apilogger",
+  "_where": "/home/juandl/test-delete/nodejs",
+  "author": {
+    "name": "juan.deleon"
+  },
+  "bugs": {
+    "url": "https://github.com/Juan-DeLeon/provident-originacion-apilogger/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Interceptor de Axios para loggear automáticamente peticiones a APIs de terceros en aplicaciones Originacion.",
+  "homepage": "https://github.com/Juan-DeLeon/provident-originacion-apilogger#readme",
+  "license": "ISC",
+  "main": "index.js",
+  "name": "provident-originacion-apilogger",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Juan-DeLeon/provident-originacion-apilogger.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
+}

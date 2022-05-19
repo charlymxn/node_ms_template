@@ -16,6 +16,6 @@ app.use(express.urlencoded({
 }));
 
 //backend routing
-app.use('/get_demo', demoRoute);
+app.use('/legalario', legalarioRoute);
 
 app.listen(port, () => console.log(`Server started on port ${port}`));
