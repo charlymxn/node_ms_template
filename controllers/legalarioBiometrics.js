@@ -2,10 +2,8 @@
 const logger = require('../utils/provident-originacion-apilogger/index');
 const validationService = require('../utils/validator');
 const awsService = require('../utils/awsService')
+const legalario = require('../utils/legalarioService')
 
-const axios = require('axios');
-const FormData = require('form-data');
-const fs = require('fs');
 
 let lambdaResponse = {
     statusCode: 200,
@@ -19,12 +17,13 @@ let input = {
     focusId: null
 }
 exports.biometrics = async (req, res) => {
+    const body = req.body;
     logger.setupInterceptors({
         logStreamName: context.logStreamName,
         appId: 2
     });
 
-    const validationResult = validationService.validateEntryBiometrics(req.body);
+    const validationResult = validationService.validateEntryBiometrics(body);
 
     if (!validationResult.isValid) {
         lambdaResponse.statusCode = 400;
@@ -36,9 +35,9 @@ exports.biometrics = async (req, res) => {
     }
     console.log("Resultado de validación: ", validationResult);
 
-    input.clientid = req.body.clientid;
-    input.focusId = req.body.focusId;
-    input.signer_id = Array.from(req.body.signer_id);
+    input.clientid = body.clientid;
+    input.focusId = body.focusId;
+    input.signer_id = Array.from(body.signer_id);
 
     try {
         console.log("trayendo de DB");
@@ -76,7 +75,7 @@ exports.biometrics = async (req, res) => {
         input.profile = filenames[1];
 
         console.log("Post a Legalario");
-        const promiseArray = req.body.signer_id.map(id => postBiometrics(id, input));
+        const promiseArray = body.signer_id.map(id => legalario.postBiometrics(id, input));
         const serviceResult = await Promise.all(promiseArray);
         lambdaResponse.body = serviceResult;
     }
@@ -87,51 +86,8 @@ exports.biometrics = async (req, res) => {
         lambdaResponse.errorMessage = err.message;
         console.log("Ocurrió un error interno al procesar la petición.", err);
     }
-
     return lambdaResponse;
 }
 
 
-const postBiometrics = async (signer_id, input) => {
-    console.log(input);
 
-    let data = new FormData();
-    data.append('signer_id', signer_id);
-    data.append('profile', fs.createReadStream(input.profile));
-    data.append('card', fs.createReadStream(input.card));
-
-    var config = {
-        method: 'post',
-        url: process.env.LEGALARIO_API + '/api/customer/compare-faces',
-        data: data,
-        headers: {
-            ...data.getHeaders(),
-            'Authorization': 'Bearer ' + process.env.LEGALARIO_TOKEN
-        },
-        metadata: {
-            idExpCliente: input.clientid,
-            focusId: input.focusId,
-            logRequest: {
-                signer_id,
-                profile: input.profile.split('-').pop(),
-                card: input.card.split('-').pop()
-            }
-        }
-    };
-    try {
-        let response = await axios(config);
-        console.log(response.data);
-        // response.data.success -> respuesta de legalario
-        // response.data.data.success -> respuesta del servicio de comparacion
-        if (response.data.data.success === false) {
-            response.data.success = false;
-            throw response.data;
-        }
-
-        return response.data;
-    }
-    catch (err) {
-        console.error(err);
-        throw err;
-    }
-}

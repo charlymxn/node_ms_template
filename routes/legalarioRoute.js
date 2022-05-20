@@ -5,7 +5,6 @@ const legalarioFillDocumentController = require('../controllers/legalarioFillDoc
 const legalarioSignDocumentController = require('../controllers/legalarioSignDocumentController.js');
 
 router.post('/postLegalarioFillDocument', legalarioFillDocumentController.post_filldocument);
-
 router.post('/postLegalarioSignDocument', legalarioSignDocumentController.post_signdocument);
 
 module.exports = router;

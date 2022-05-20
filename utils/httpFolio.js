@@ -1,4 +1,4 @@
-const dbService = require('./dbService');
+const dbService = require('../controllers/dbService');
 
 const axios = require('axios');
 const { request } = require('http');

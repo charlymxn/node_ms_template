@@ -1,7 +1,5 @@
 const logger = require('../utils/provident-originacion-apilogger/index');
-
-const axios = require('axios');
-const qs = require('qs');
+const legalarioService = require('../utils/legalarioService')
 
 let lambdaResponse = {
     statusCode: 200,
@@ -17,7 +15,7 @@ exports.post_verify = async (req, res) => {
 
     try {
         console.log("Post a legalario");
-        const serviceResult = await postAuthVerify(req.body);
+        const serviceResult = await legalarioService.postAuthVerify(req.body);
         lambdaResponse.body = serviceResult;
         console.log("Termina post legalario");
     }
@@ -31,35 +29,3 @@ exports.post_verify = async (req, res) => {
 }
 
 
-const postAuthVerify = async (input) => {
-    const postData = qs.stringify({
-        'customer_login': input.customer_login,
-        'code': input.code,
-        'document_ids': Array.from(input.document_id)
-    });
-
-    var config = {
-        method: 'post',
-        url: process.env.LEGALARIO_API + '/api/customer/auth/massive/verify',
-        data: postData,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Bearer ' + process.env.LEGALARIO_TOKEN
-        },
-        metadata: {
-            idExpCliente: input.idExpCliente,
-            focusId: input.focusId
-        }
-    };
-    try {
-        let response = await axios(config);
-        console.log(response.data);
-        return response.data;
-    }
-    catch (err) {
-        console.error(err);
-        console.log(err?.response?.data);
-        throw err?.response?.data || err;
-    }
-
-}

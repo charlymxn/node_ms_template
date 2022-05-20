@@ -44,7 +44,7 @@ const checksumCode = (code, base) => {
     for (let i = 0; i < codigoSplit.length; i++) {
         let n = codigoSplit[i] * base[i];
         // si es mayor
-        if (n >= 10){
+        if (n >= 10) {
             const arr = n.toString().split('');
             n = parseInt(arr[0]) + parseInt(arr[1]);
         }
@@ -56,26 +56,26 @@ const checksumCode = (code, base) => {
 }
 
 const generateBarcodeImg = (code, provider) => {
-    // var params = {
-    //     FunctionName: 'generateBarcode', // the lambda function we are going to invoke
-    //     InvocationType: 'RequestResponse',
-    //     LogType: 'Tail',
-    //     Payload: JSON.stringify({ code, provider })
-    // };
-    // return new Promise((resolve, reject) => {
-    //     lambda.invoke(params, (err, res) => {
-    //         const data = JSON.parse(res.Payload); // lambda payload is string
-    //         if (err) {
-    //             reject(err);
-    //         }
-    //         else if (data.statusCode === 400) {
-    //             console.error(data);
-    //             reject(new Error("Error creando codigo de barras:\n" + res.Payload));
-    //         } else {
-    //             resolve(data.body);
-    //         }
-    //     });
-    // });
+    var params = {
+        FunctionName: 'generateBarcode', // the lambda function we are going to invoke
+        InvocationType: 'RequestResponse',
+        LogType: 'Tail',
+        Payload: JSON.stringify({ code, provider })
+    };
+    return new Promise((resolve, reject) => {
+        lambda.invoke(params, (err, res) => {
+            const data = JSON.parse(res.Payload); // lambda payload is string
+            if (err) {
+                reject(err);
+            }
+            else if (data.statusCode === 400) {
+                console.error(data);
+                reject(new Error("Error creando codigo de barras:\n" + res.Payload));
+            } else {
+                resolve(data.body);
+            }
+        });
+    });
 }
 
 module.exports = {

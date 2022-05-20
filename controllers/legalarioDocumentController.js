@@ -1,12 +1,7 @@
 const logger = require('../utils/provident-originacion-apilogger/index');
 const awsService = require('../utils/awsService')
-
-
-const axios = require('axios');
-const qs = require('qs');
-
-const DOC_TYPE_NOSIGN = 'Documento sin firmas';
-const DOC_TYPE_SIGNED = 'Documento con firmado';
+const legalario = require('../utils/legalarioService')
+const validationService = require('../utils/validator');
 
 let lambdaResponse = {
     statusCode: 200,
@@ -16,6 +11,8 @@ let lambdaResponse = {
 
 
 exports.get_document = async (req, res) => {
+    const body = req.query;
+    
     logger.setupInterceptors({
         logStreamName: context.logStreamName,
         appId: 2,
@@ -27,10 +24,10 @@ exports.get_document = async (req, res) => {
     });
 
     // input validation
-    if (req.body.signed instanceof String)
-        req.body.signed = req.body.signed === "true";
+    if (body.signed instanceof String)
+        body.signed = body.signed === "true";
 
-    const validationResult = validationService.validateEntryDocument(req.body);
+    const validationResult = validationService.validateEntryDocument(body);
     if (!validationResult.isValid) {
         lambdaResponse.statusCode = 400;
         lambdaResponse.body = null;
@@ -42,13 +39,13 @@ exports.get_document = async (req, res) => {
 
     try {
         console.log("Post a legalario");
-        const serviceResult = await getDocumentBase64(req.body);
+        const serviceResult = await legalario.getDocumentBase64(body.document_id, body.signed, body );
 
-        if (req.body.signed && req.body.idKiban && req.body.docType) {
-            if (req.body.updateDoc) {
-                await awsService.S3UpdateFile(req.body, serviceResult.data.document);
-            } else {
-                await awsService.S3UploadIfNotExists(req.body, serviceResult.data.document);
+        if (body.signed && body.idKiban && body.docType) {
+            if (body.updateDoc){
+                await awsService.S3UpdateFile(body, serviceResult.data.document);
+            }else{
+                await awsService.S3UploadIfNotExists(body, serviceResult.data.document);
             }
         }
 
@@ -63,36 +60,4 @@ exports.get_document = async (req, res) => {
     }
 
     return lambdaResponse;
-}
-
-
-const getDocumentBase64 = async (input) => {
-    const postData = qs.stringify({
-        'document_id': input.document_id,
-        'document_type': input.signed? DOC_TYPE_SIGNED : DOC_TYPE_NOSIGN,
-        'format': 'Base 64 (String Encoded)'
-    });
-
-    var config = {
-        method: 'post',
-        url: process.env.LEGALARIO_API + '/api/document/pdf/download',
-        data: postData,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Bearer ' + process.env.LEGALARIO_TOKEN
-        },
-        metadata: {
-            idExpCliente: input.idExpCliente,
-            focusId: input.focusId
-        }
-    };
-    try {
-        let response = await axios(config);
-        // console.log(response.data.document); // document in base64
-        return response.data;
-    }
-    catch (err) {
-        console.error(err);
-        throw err;
-    }
 }
