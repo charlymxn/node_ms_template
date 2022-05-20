@@ -1,7 +1,7 @@
 const qs = require('qs');
 const { DateTime } = require("luxon");
 const writtenNumber = require('number-in-letters');
-const DOCUMENT_ID = require('../config/config.json');
+const DOCUMENT_ID = require('../utils/config.json');
 const { generateBarcodes } = require('./barcode');
 
 // map getMonth to ES month

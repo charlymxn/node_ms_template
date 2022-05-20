@@ -3,7 +3,7 @@ const cors = require('cors');
 const app = express();
 const {connectionPool} = require('./config/db')
 //route imports
-const demoRoute = require('./routes/demoRoute');
+const legalarioRoute = require('./routes/legalarioRoute');
 
 // server port
 const port =  process.env.PORT || 5000;

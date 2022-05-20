@@ -10,66 +10,59 @@ let lambdaResponse = {
 }
 
 exports.post_filldocument = async (req, res) => {
-    try {
+    logger.setupInterceptors({
+        logStreamName: context.logStreamName,
+        appId: 2,
+        delPropsRes: [
+            'data.userDocument.organization_document',
+            'data.userDocument.sequence',
+            'data.document',
+            'data.userDocument.user'
+        ]
+    });
+    
+    const validationResult = validationService.validateEntryFillDocument(req.body);
+    if (!validationResult.isValid) {
+        lambdaResponse.statusCode = 400;
+        lambdaResponse.body = null;
+        lambdaResponse.errorMessage = validationResult.validationMessage;    
+    }
+
+    input.clientid = req.body.clientid;
+    input.focusId = req.body.focusId;
+    input.fromSdk = req.body.fromSdk;
 
 
-        logger.setupInterceptors({
-            logStreamName: context.logStreamName,
-            appId: 2,
-            delPropsRes: [
-                'data.userDocument.organization_document',
-                'data.userDocument.sequence',
-                'data.document',
-                'data.userDocument.user'
-            ]
-        });
-        
-        const validationResult = validationService.validateEntryFillDocument(req.body);
-        if (!validationResult.isValid) {
-            lambdaResponse.statusCode = 400;
-            lambdaResponse.body = null;
-            lambdaResponse.errorMessage = validationResult.validationMessage;    
-        }
+    const dbResponse = await dbService.getExpedienteCliente(input);
+    const client = dbResponse.data;
 
-        input.clientid = req.body.clientid;
-        input.focusId = req.body.focusId;
-        input.fromSdk = req.body.fromSdk;
+    const document_id = doc_type.map(type =>
+        legalarioHelper.documentIdFromType(type, client)
+    );
 
-
-        const dbResponse = await dbService.getExpedienteCliente(input);
-        const client = dbResponse.data;
-
-        const document_id = doc_type.map(type =>
-            legalarioHelper.documentIdFromType(type, client)
+    let promises = document_id.map(id => postDocumentFill(id, client, input));
+    const originalDocs = await Promise.all(promises);
+    
+    let pdfs = [];
+    if(!input.fromSdk){
+        promises = originalDocs.map(doc =>
+            getDocumentBase64(doc.data.userDocument._id, input)
         );
+        pdfs = await Promise.all(promises);
+    }
 
-        let promises = document_id.map(id => postDocumentFill(id, client, input));
-        const originalDocs = await Promise.all(promises);
-        
-        let pdfs = [];
-        if(!input.fromSdk){
-            promises = originalDocs.map(doc =>
-                getDocumentBase64(doc.data.userDocument._id, input)
-            );
-            pdfs = await Promise.all(promises);
-        }
+    lambdaResponse.body = {
+        success: originalDocs[0].success,
+        data: originalDocs.reduce((accum, el, idx) => {
+            const returnData = {
+                _id: el.data.userDocument._id,
+                document: pdfs[idx]?.data.document
+            }
+            return accum.concat(returnData);
+        }, []),
+    };
 
-        lambdaResponse.body = {
-            success: originalDocs[0].success,
-            data: originalDocs.reduce((accum, el, idx) => {
-                const returnData = {
-                    _id: el.data.userDocument._id,
-                    document: pdfs[idx]?.data.document
-                }
-                return accum.concat(returnData);
-            }, []),
-        };
-
-    } catch(error) {
-        lambdaResponse.statusCode = 500;
-        lambdaResponse.errorMessage = err.message;
-        lambdaResponse.body = err;
-    }  
+    return lambdaResponse;
 }
 
 
